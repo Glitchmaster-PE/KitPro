@@ -12,16 +12,24 @@ class KitPro extends PluginBase {
 	public function onEnable(){
 		$this->players = array();
 		if(file_exists($this->getDataFolder() . "donators.yml")){
-			$this->donators = (new Config($this->getDataFolder()."donators.yml", Config::YAML))->getAll();
+			$this->donators = (new Config($this->getDataFolder() . "donators.yml", Config::YAML))->getAll();
 		}else{
 			$this->donators = array();
+		}
+		if(file_exists($this->getDataFolder() . "settings.yml")){
+			$this->settings = (new Config($this->getDataFolder() . "settings.yml", Config::YAML))->getAll();
+		}else{
+			$this->settings = array();
 		}
 		$this->prefix = "[KitPro]";
 	}
 	
 	public function onDisable(){
-		$config = new Config($this->getDataFolder()."donators.yml",Config::YAML,array());
+		$config = new Config($this->getDataFolder() . "donators.yml", Config::YAML,a rray());
 		$config->setAll($this->donators);
+		$config->save();
+		$config = new Config($this->getDataFolder() . "settings.yml", Config::YAML, array());
+		$config->setAll($this->settings);
 		$config->save();
 	}
 	
