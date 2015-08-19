@@ -69,11 +69,11 @@ class KitPro extends PluginBase {
 						}
 						else{
 							$sender->sendMessage("[KitPro] You have recieved the Offense Kit!");
+							$sender->getInventory()->addItem(Item::get(Item::DIAMOND_SWORD));
 							$sender->getInventory()->addItem(Item::get(Item::LEATHER_CAP));
 							$sender->getInventory()->addItem(Item::get(Item::LEATHER_BOOTS));
-							$sender->getInventory()->addItem(Item::get(Item::LEATHER_LEGGINGS));
-							$sender->getInventory()->addItem(Item::get(Item::LEATHER_CHESTPLATE));
-							$sender->getInventory()->addItem(Item::get(Item::DIAMOND_SWORD));
+							$sender->getInventory()->addItem(Item::get(Item::LEATHER_PANTS));
+							$sender->getInventory()->addItem(Item::get(Item::LEATHER_TUNIC));
 							array_push($this->players, $sender->getName());
 						}
 						return true;
