@@ -7,6 +7,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\Player;
 use pocketmine\item\Item;
 use pocketmine\utils\Config;
+
 class KitPro extends PluginBase {
 	
 	public function onEnable(){
@@ -167,7 +168,7 @@ class KitPro extends PluginBase {
 				}
 			}
 			
-			if(strtolower($cmd->getName()) == "donator"){
+			if(strtolower($cmd->getName()) === "donator"){
 				switch(strtolower($args[0])){
 					case "add":
 						$sender->sendMessage($this->prefix . "" . $args[1] . " has been added as a donator!");
