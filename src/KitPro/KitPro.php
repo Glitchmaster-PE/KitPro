@@ -26,7 +26,7 @@ class KitPro extends PluginBase {
 	}
 	
 	public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
-		if($cmd->getName() == "kit"){
+		if(strtolower($cmd->getName()) === "kit"){
 			switch(strtolower($args[0])){
 				case "list":
 					if(in_array($sender->getName(), $this->donators)){
@@ -167,7 +167,7 @@ class KitPro extends PluginBase {
 				}
 			}
 			
-			if($cmd->getName() == "donator"){
+			if(strtolower($cmd->getName()) == "donator"){
 				switch(strtolower($args[0])){
 					case "add":
 						$sender->sendMessage($this->prefix . "" . $args[1] . " has been added as a donator!");
