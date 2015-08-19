@@ -27,7 +27,7 @@ class KitPro extends PluginBase {
 	}
 	
 	public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
-		if(strtolower($cmd->getName()) === "kit"){
+		if(strtolower($cmd->getName()) === "kitpro"){
 			switch(strtolower($args[0])){
 				case "list":
 					if(in_array($sender->getName(), $this->donators)){
@@ -157,11 +157,11 @@ class KitPro extends PluginBase {
 					break;
 				default:
 					if(in_array($sender->getName(), $this->players)){
-						$sender->sendMessage($this->prefix . "Usage: /kit reset");
+						$sender->sendMessage($this->prefix . "Usage: /kitpro reset");
 						return true;
 					}
 					else{
-						$sender->sendMessage($this->prefix . "Usage: /kit <kit name> or /kit list");
+						$sender->sendMessage($this->prefix . "Usage: /kitpro <kit name> or /kitpro list");
 						return true;
 					}
 					break;
