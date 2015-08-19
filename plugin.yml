@@ -1,0 +1,20 @@
+name: KitPro
+main: KitPro\KitPro
+version: "4.1"
+api: 1.10.0
+
+commands:
+  kit:
+    description: Choose a kit
+    usage: "/kit <kit name> or /kit list"
+    permission: kitpro.kit
+  donator:
+    description: Make a user a donator
+    usage: "/donator <add|rmv> <exact username>"
+    permission: kitpro.donator
+    
+permissions:
+  kitpro.kit:
+    default: true
+  kitpro.donator:
+    default: true
