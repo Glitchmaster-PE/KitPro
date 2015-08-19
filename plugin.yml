@@ -7,7 +7,7 @@ author: Glitchmaster-PE
 commands:
   kit:
     description: Choose a kit
-    usage: "/kit <kit name> or /kit list"
+    usage: "/kitpro <kit name> or /kitpro list"
     permission: kitpro.kit
   donator:
     description: Make a user a donator
