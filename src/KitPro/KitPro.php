@@ -92,6 +92,7 @@ class KitPro extends PluginBase {
 	
 	public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
 		if(strtolower($cmd->getName()) === "kit"){
+			if(isset($args[0])){
 			switch(strtolower($args[0])){
 				case "list":
 						//$sender->sendMessage($this->prefix . implode(", ", $this->kits));
@@ -210,9 +211,29 @@ class KitPro extends PluginBase {
 					}
 					break;
 			}
+			}
+			else{
+				if (!$sender instanceof Player)
+				{
+					$sender->sendMessage("[KitPro] Consoles don't need kits!");
+					return true;
+				}
+				$username = $sender->getName();
+				if (in_array($username, $this -> players))
+				{
+					$sender->sendMessage('Usage: /kit reset');
+					return true;
+				}
+				else
+				{
+					$sender->sendMessage("[KitPro] Usage: /kit <kit name> or /kit list");
+					return true;
+				}
+			}
 		}
 			
 			if(strtolower($cmd->getName()) == "donator"){
+				if(isset($args[0])){
 				switch(strtolower($args[0])){
 					case "add":
 						$sender->sendMessage($this->prefix . "" . $args[1] . " has been added as a donator!");
@@ -229,6 +250,11 @@ class KitPro extends PluginBase {
 						$sender->sendMessage($this->prefix . "Usage: /donator <add|rmv> <exact username>");
 						return true;
 						break;
+				}
+				}
+				else{
+					$sender->sendMessage("[KitPro] Usage: /donator <add|rmv> <exact username>");
+					return true;
 				}
 			}
 		}
