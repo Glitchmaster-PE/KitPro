@@ -1,5 +1,6 @@
 <?php 
 namespace KitPro;
+
 use KitPro\Commands\Donator;
 use KitPro\Commands\Kit;
 use pocketmine\plugin\PluginBase;
@@ -8,6 +9,7 @@ use pocketmine\item\Item;
 use pocketmine\utils\Config;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
+
 class KitPro extends PluginBase implements Listener{
 	/** @var Config */
 	private $kits = [];
