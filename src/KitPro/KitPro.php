@@ -7,10 +7,15 @@ use pocketmine\command\CommandSender;
 use pocketmine\Player;
 use pocketmine\item\Item;
 use pocketmine\utils\Config;
-class KitPro extends PluginBase {
+use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\Server;
+class KitPro extends PluginBase implements Listener {
 	
 	public function onEnable(){
+		if (!is_dir($this->getDataFolder())) mkdir($this->getDataFolder());
 		$this->players = array();
+		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		if(file_exists($this->getDataFolder() . "donators.yml")){
 			$this->donators = (new Config($this->getDataFolder()."donators.yml", Config::YAML))->getAll();
 		}else{
@@ -133,31 +138,6 @@ class KitPro extends PluginBase {
 					}
 						return true;
 					break;
-				case "reset":
-					if(in_array($sender->getName(), $this->players)){
-						$sender->sendMessage($this->prefix . "Do you really want to reset? This will clear your whole inventory. If so, do /kit resetyes");
-						return true;
-					}
-					
-					else{
-						$sender->sendMessage($this->prefix . "You can't reset, you haven't even selected a kit!");	
-						return true;
-					}
-					
-					break;
-				case "resetyes":
-					if(in_array($sender->getName(), $this->players)){
-						$sender->sendMessage($this->prefix . "You're inventory has been reset, you may pick a new kit!");
-						$sender->getInventory()->clearAll();
-						$key = array_search($sender->getName(), $this -> players);
-						unset($this -> players[$key]);
-						return true;
-					}
-					else{
-						$sender->sendMessage($this->prefix . "You can't reset, you haven't even selected a kit!");
-						return true;
-					}
-					break;
 				case "":
 					if (!$sender instanceof Player)
 					{
@@ -167,7 +147,7 @@ class KitPro extends PluginBase {
 					$username = $sender->getName();
 					if (in_array($username, $this -> players))
 					{
-						$sender->sendMessage('Usage: /kit reset');
+						$sender->sendMessage('[KitPro] You need to die before you can pick a new kit!');
 						return true;
 					}
 					else
@@ -185,7 +165,7 @@ class KitPro extends PluginBase {
 					$username = $sender->getName();
 					if (in_array($username, $this -> players))
 					{
-						$sender->sendMessage('Usage: /kit reset');
+						$sender->sendMessage('[KitPro] You need to die before you can pick a new kit!');
 						return true;
 					}
 					if (isset($this -> kits[strtolower($args[0])]))
@@ -221,7 +201,7 @@ class KitPro extends PluginBase {
 				$username = $sender->getName();
 				if (in_array($username, $this -> players))
 				{
-					$sender->sendMessage('Usage: /kit reset');
+					$sender->sendMessage('[KitPro] You need to die before you can pick a new kit!');
 					return true;
 				}
 				else
@@ -266,4 +246,11 @@ class KitPro extends PluginBase {
 					$player->getInventory()->addItem(Item::get($val[0],$val[1],$val[2]));
 			}
 		}
+		
+		public function onPlayerDeath(PlayerDeathEvent $event){
+			$event->getEntity()->sendMessage("[KitPro] You died and may now pick a new kit!");
+			$key = array_search($event->getEntity()->getName(),$this->players);
+			unset($this->players[$key]);
+		}
+		
 	}
