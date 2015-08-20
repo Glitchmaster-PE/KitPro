@@ -1,7 +1,7 @@
 name: KitPro
 main: KitPro\KitPro
 version: "4.1"
-api: 1.10.0
+api: 1.12.0
 author: Glitchmaster-PE
 
 commands:
