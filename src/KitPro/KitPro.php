@@ -1,256 +1,175 @@
 <?php 
 namespace KitPro;
+use KitPro\Commands\Donator;
+use KitPro\Commands\Kit;
 use pocketmine\plugin\PluginBase;
-use pocketmine\command\Command;
-use pocketmine\command\CommandExecuter;
-use pocketmine\command\CommandSender;
 use pocketmine\Player;
 use pocketmine\item\Item;
 use pocketmine\utils\Config;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
-use pocketmine\Server;
-class KitPro extends PluginBase implements Listener {
+class KitPro extends PluginBase implements Listener{
+	/** @var Config */
+	private $kits = [];
+	/** @var Config */
+	private $donators = [];
+    /** @var array */
+    private $players = [];
 	
 	public function onEnable(){
-		if (!is_dir($this->getDataFolder())) mkdir($this->getDataFolder());
+		if(!is_dir($this->getDataFolder())){
+			mkdir($this->getDataFolder());
+		}
 		$this->players = array();
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+        $this->getServer()->getCommandMap()->registerAll("KitPro", [
+            new Kit($this), new Donator($this)
+        ]);
 		if(file_exists($this->getDataFolder() . "donators.yml")){
 			$this->donators = (new Config($this->getDataFolder()."donators.yml", Config::YAML))->getAll();
-		}else{
-			$this->donators = array();
 		}
-		if(file_exists($this->getDataFolder() . "kits.yml")){
-			$this -> kits = (new Config($this -> getDataFolder() . "kits.yml", Config::YAML))->getAll();
-		}
-		else{
-			$this->kits = array(
-			"soldier" => array(
+        $this->kits = new Config($this -> getDataFolder() . "kits.yml", Config::YAML, [
+            "soldier" => [
                 "Donator" => false,
-                "Items" => array(
-                    array(
-                        272,
-                    	0,
-                        1
-                    ), // id, meta, count
-                    array(
-                        260,
-                    	0,
-                        3
-                    ),
-                )
-            ),
-            "wool" => array(
+                "Items" => [
+                    [272, 0, 1],
+                    [260, 0, 3]
+                ]
+            ],
+            "wool" => [
                 "Donator" => false,
-                "Items" => array(
-                    array(
-                        35,
-                    	0,
-                        1
-                    ),
-                    array(
-                        35,
-                    	1,
-                        1
-                    ),
-                    array(
-                        35,
-                    	2,
-                        1
-                    ),
-                )
-            ),
-            "Donator" => array(
+                "Items" => [
+                    [35, 0, 1],
+                    [35, 1, 1],
+                    [35, 2, 1]
+                ]
+            ],
+            "donator" => [
                 "Donator" => true,
-                "Items" => array(
-                    array(
-                        276,
-                    	0,
-                        1
-                    ),
-                    array(
-                        306,
-                    	0,
-                        1
-                    ),
-                    array(
-                        307,
-                    	0,
-                        1
-                    ),
-                )
-            ),
-			);
-		}
-		$this->prefix = "[KitPro] ";
+                "Items" => [
+                    [276, 0, 1],
+                    [306, 0, 1],
+                    [307, 0, 1]
+                ]
+            ]
+        ]);
 	}
 	
 	public function onDisable(){
-		$config = new Config($this->getDataFolder()."donators.yml",Config::YAML,array());
-		$config->setAll($this->donators);
-		$config->save();
-		$kits = new Config($this -> getDataFolder() . "kits.yml", Config::YAML, array());
-		$kits->setAll($this->kits);
-		$kits->save();
+		$this->donators->save();
+		$this->kits->save();
 	}
-	
-	public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
-		if(strtolower($cmd->getName()) === "kit"){
-			if(isset($args[0])){
-			switch(strtolower($args[0])){
-				case "list":
-						//$sender->sendMessage($this->prefix . implode(", ", $this->kits));
-					$normalKits = 'Normal Kits: ';
-					$donatorKits = 'Donator Kits: ';
-					foreach ($this->kits as $name => $kit)
-					{
-						if ($kit['Donator'] == true)
-						{
-							if ($donatorKits === 'Donator Kits: ')
-							{
-								$donatorKits .= $name;
-							}
-							else
-							{
-								$donatorKits .= ', ' . $name;
-							}
-						}
-						else
-						{
-							if ($normalKits === 'Normal Kits: ')
-							{
-								$normalKits .= $name;
-							}
-							else
-							{
-								$normalKits .= ', ' . $name;
-							}
-						}
-					}
-					if ($normalKits !== 'Normal Kits: ')
-					{
-						$sender -> sendMessage("[KitPro] " . $normalKits);
-					}
-					if ($donatorKits !== 'Donator Kits: ')
-					{
-						$sender -> sendMessage("[KitPro] " . $donatorKits);
-					}
-						return true;
-					break;
-				case "":
-					if (!$sender instanceof Player)
-					{
-						$sender->sendMessage("[KitPro] Consoles don't need kits!");
-						return true;
-					}
-					$username = $sender->getName();
-					if (in_array($username, $this -> players))
-					{
-						$sender->sendMessage('[KitPro] You need to die before you can pick a new kit!');
-						return true;
-					}
-					else
-					{
-						$sender->sendMessage("[KitPro] Usage: /kit <kit name> or /kit list");
-						return true;
-					}
-					break;
-				default:
-					if (!$sender instanceof Player)
-					{
-						$sender->sendMessage("[KitPro] Consoles don't need kits!");
-						return true;
-					}
-					$username = $sender->getName();
-					if (in_array($username, $this -> players))
-					{
-						$sender->sendMessage('[KitPro] You need to die before you can pick a new kit!');
-						return true;
-					}
-					if (isset($this -> kits[strtolower($args[0])]))
-					{
-						$kit = $this -> kits[strtolower($args[0])];
-						if ($kit["Donator"] == true and !in_array($username, $this -> donators))
-						{
-							$sender->sendMessage('You are not a donator!');
-							return true;
-						}
-						else
-						{
-							$this -> giveKit($kit, $sender);
-							$sender->sendMessage('[KitPro] Your kit has been given!');
-							array_push($this -> players, $username);
-							return true;
-						}
-					}
-					else
-					{
-						$sender->sendMessage("[KitPro] Usage: /kit <kit name> or /kit list");
-						return true;
-					}
-					break;
-			}
-			}
-			else{
-				if (!$sender instanceof Player)
-				{
-					$sender->sendMessage("[KitPro] Consoles don't need kits!");
-					return true;
-				}
-				$username = $sender->getName();
-				if (in_array($username, $this -> players))
-				{
-					$sender->sendMessage('[KitPro] You need to die before you can pick a new kit!');
-					return true;
-				}
-				else
-				{
-					$sender->sendMessage("[KitPro] Usage: /kit <kit name> or /kit list");
-					return true;
-				}
-			}
-		}
-			
-			if(strtolower($cmd->getName()) == "donator"){
-				if(isset($args[0])){
-				switch(strtolower($args[0])){
-					case "add":
-						$sender->sendMessage($this->prefix . "" . $args[1] . " has been added as a donator!");
-						array_push($this->donators, $args[1]);
-						return true;
-						break;
-					case "rmv":
-						$sender->sendMessage($this->prefix . "" . $args[1] . " has been removed as a donator!");
-						$key = array_search($args[1], $this -> donators);
-						unset($this -> donators[$key]);
-						return true;
-						break;
-					default:
-						$sender->sendMessage($this->prefix . "Usage: /donator <add|rmv> <exact username>");
-						return true;
-						break;
-				}
-				}
-				else{
-					$sender->sendMessage("[KitPro] Usage: /donator <add|rmv> <exact username>");
-					return true;
-				}
-			}
-		}
-		
-		public function giveKit($kit, $player)
-		{
-			foreach ($kit['Items'] as $val)
-			{
-					$player->getInventory()->addItem(Item::get($val[0],$val[1],$val[2]));
-			}
-		}
-		
-		public function onPlayerDeath(PlayerDeathEvent $event){
-			$event->getEntity()->sendMessage("[KitPro] You died and may now pick a new kit!");
-			$key = array_search($event->getEntity()->getName(),$this->players);
-			unset($this->players[$key]);
-		}
-		
+
+    /**
+     * @param PlayerDeathEvent $event
+     *
+     * @ignoreCancelled true
+     * @priority MONITOR
+     */
+    public function onPlayerDeath(PlayerDeathEvent $event){
+        $this->players[strtolower($event->getEntity()->getName())] = false;
+		$event->getEntity()->sendMessage("[KitPro] You died and may now pick a new kit!");
+    }
+
+    /**
+     * @param string $name
+     * @return array|bool
+     */
+	public function getKit($name){
+		$name = strtolower($name);
+        return $this->kits->exists($name) ? $this->kits->get($name) : false;
 	}
+
+    /**
+     * @param bool $inArray
+     * @return array|string
+     */
+	public function kitList($inArray = false){
+		$kits = [
+			"Normal kits" => [],
+			"Donator kits" => []
+		];
+		foreach($this->kits->getAll() as $key => $values){
+			if($values["Donator"]){
+				$kits["Donator kits"][] = $key;
+			}else{
+				$kits["Normal kits"][] = $key;
+			}
+		}
+		if(!$inArray){
+			$k = "[KitPro] Available kits:\n - Normal kits:";
+			$d = "\n - Donator kits:";
+			foreach($kits as $type => $list){
+				if($type === "Normal kits"){
+					$k.= implode("\n  * ", $list);
+				}else{
+					$d.= implode("\n  * ", $list);
+				}
+			}
+			$kits = $k . $d;
+		}
+		return $kits;
+	}
+
+    /**
+     * @param Player $player
+     * @param array $kit
+     * @return bool
+     */
+    public function giveKit(Player $player, array $kit){
+        if($kit["Donator"] && !$this->isDonator($player)){
+            return false;
+        }
+        $items = $kit["Items"];
+        foreach(($items) as $key => $values){
+            if(!isset($values[1])){
+                $values[1] = 0;
+            }
+            if(!isset($values[2])){
+                $values[2] = 1;
+            }
+            $items[$key] = new Item($values[0], $values[1], $values[2]);
+        }
+        $player->getInventory()->addItem(...$items);
+        return true;
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     */
+    public function isDonator(Player $player){
+        return $this->donators->exists($player->getName(), true);
+    }
+
+    /**
+     * @param string $name
+     */
+    public function addDonator($name){
+        $this->donators->set(strtolower($name), true);
+    }
+
+    /**
+     * @param string $name
+     */
+    public function removeDonator($name){
+        if($this->donators->exists($name, true)){
+            $this->donators->remove(strtolower($name));
+        }
+    }
+
+    /**
+     * @param Player $player
+     * @return bool
+     */
+    public function canGetKit(Player $player){
+        return (!isset($this->players[strtolower($player->getName())]) || !$this->players[strtolower($player->getName())]);
+    }
+
+    /**
+     * @param Player $player
+     */
+    public function addToWaitingList(Player $player){
+        $this->players[strtolower($player->getName())] = true;
+    }
+}
