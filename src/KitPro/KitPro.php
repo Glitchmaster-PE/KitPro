@@ -28,7 +28,7 @@ class KitPro extends PluginBase implements Listener{
             new Kit($this), new Donator($this)
         ]);
 		if(file_exists($this->getDataFolder() . "donators.yml")){
-			$this->donators = (new Config($this->getDataFolder()."donators.yml", Config::YAML))->getAll();
+			$this->donators = new Config($this->getDataFolder()."donators.yml", Config::YAML);
 		}
         $this->kits = new Config($this -> getDataFolder() . "kits.yml", Config::YAML, [
             "soldier" => [
